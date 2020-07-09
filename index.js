@@ -151,8 +151,7 @@ class EcoforestHeater {
     this.log.info("Changing heater ActiveStatus to: %s", value);
 
     this.pullTimer.stop();
-    // this.httpRequest(this.apiroute, 'idOperacion=1013&on_off=' + value, function (error, response, responseBody) {
-    this.httpRequest(this.apiroute, 'idOperacion=1002', function (error, response, responseBody) {
+    this.httpRequest(this.apiroute, 'idOperacion=1013&on_off=' + value, function (error, response, responseBody) {
         if (error) {
           this.log.warn("[!] Error setting ActiveStatus: %s - %s", error.message, responseBody);
           this.pullTimer.start();
