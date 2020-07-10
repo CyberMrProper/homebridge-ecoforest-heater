@@ -1,10 +1,10 @@
-# homebridge-ecoforest-thermostat
+# homebridge-ecoforest-heater
 
-#### Homebridge plugin to control an Ecoforest heater thermostat
+#### Homebridge plugin to control an Ecoforest heater device
 
 ## Installation
 
-1. Install [homebridge](https://github.com/nfarina/homebridge#installation-details)
+1. Install [homebridge](https://github.com/homebridge/homebridge#installation-details)
 2. Install this plugin: `npm install -g homebridge-ecoforest-heater`
 3. Update your `config.json` file (See below).
 

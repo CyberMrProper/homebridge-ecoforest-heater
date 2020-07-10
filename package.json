@@ -1,7 +1,7 @@
 {
   "name": "homebridge-ecoforest-heater",
   "displayName": "Homebridge Ecoforest Heater",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Ecoforest heater plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [

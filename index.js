@@ -43,7 +43,7 @@ class EcoforestHeater {
   }
 
   identify(callback) {
-    this.log.info("Hi, I'm %", this.name);
+    this.log.info("Hi, I'm ", this.name);
     callback();
   }
 
