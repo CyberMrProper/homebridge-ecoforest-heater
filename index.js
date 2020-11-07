@@ -66,11 +66,18 @@ class EcoforestHeater {
      return JSON.parse('{"' + responseFields + '"}');
   }
 
-  getEcoforestHeaterActiveStatus(estado){
+  getEcoforestHeaterActiveState(estado){
     if (["1", "2", "3", "4", "5", "6", "7", "10", "20"].includes(estado))
       return Characteristic.Active.ACTIVE;
     else
       return Characteristic.Active.INACTIVE;
+  }
+
+  getEcoforestCurrentHeaterCoolerState(estado){
+    if (this.getEcoforestHeaterActiveState(estado))
+      return estado === "20" ? Characteristic.CurrentHeaterCoolerState.IDLE: Characteristic.CurrentHeaterCoolerState.HEATING;
+    else
+      return Characteristic.CurrentHeaterCoolerState.INACTIVE;
   }
 
   refreshEcoforestHeaterStatus() {
@@ -102,11 +109,18 @@ class EcoforestHeater {
             this.log.info("Changing HeatingThresholdTemperature from %s to %s", oldHeatingThresholdTemperature, newHeatingThresholdTemperature);
           }
 
-          var newHeaterActiveStatus = this.getEcoforestHeaterActiveStatus(json.estado);
+          var newHeaterActiveStatus = this.getEcoforestHeaterActiveState(json.estado);
           var oldHeaterActiveStatus = this.service.getCharacteristic(Characteristic.Active).value;
           if (newHeaterActiveStatus != oldHeaterActiveStatus){
             this.service.getCharacteristic(Characteristic.Active).updateValue(newHeaterActiveStatus);
             this.log.info("Changing ActiveStatus from %s to %s", oldHeaterActiveStatus, newHeaterActiveStatus);
+          }
+
+          var newCurrentHeaterCoolerState = this.getEcoforestCurrentHeaterCoolerState(json.estado);
+          var oldCurrentHeaterCoolerState = this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).value;
+          if (newCurrentHeaterCoolerState != oldCurrentHeaterCoolerState){
+            this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(newCurrentHeaterCoolerState);
+            this.log.info("Changing CurrentHeaterCoolerState from %s to %s", oldCurrentHeaterCoolerState, newCurrentHeaterCoolerState);
           }
           
           this.pullTimer.start();
@@ -131,7 +145,7 @@ class EcoforestHeater {
           this.log.debug("Response received from Ecoforest heater:\n%s", responseBody);
 
           var json = this.parseEcoforestResponse(responseBody);
-          var heaterActiveStatus = this.getEcoforestHeaterActiveStatus(json.estado);
+          var heaterActiveStatus = this.getEcoforestHeaterActiveState(json.estado);
           this.log.info("Current heater ActiveStatus is: %s", heaterActiveStatus);
 
           this.pullTimer.start();
@@ -163,6 +177,8 @@ class EcoforestHeater {
         } else {
           this.log.debug("Response received from Ecoforest heater:\n%s", responseBody);
           this.log.info("Heater ActiveStatus sucessfully set to: %s", value);
+          this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+            .updateValue(value ? Characteristic.CurrentHeaterCoolerState.HEATING: Characteristic.CurrentHeaterCoolerState.INACTIVE);
 
           this.pullTimer.start();
           callback(null, value)
@@ -223,10 +239,6 @@ class EcoforestHeater {
     callback(null, Characteristic.TargetHeaterCoolerState.HEAT);
   }
 
-  getCurrentHeaterCoolerState(callback) {
-    callback(null, Characteristic.CurrentHeaterCoolerState.HEATING)
-  }
-
   getName(callback) {
     callback(null, this.name);
   }
@@ -244,7 +256,7 @@ class EcoforestHeater {
       .on('set', this.setActive.bind(this))
 
     this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .on('get', this.getCurrentHeaterCoolerState.bind(this));
+      .updateValue(Characteristic.CurrentHeaterCoolerState.INACTIVE);
 
     this.service
       .getCharacteristic(Characteristic.TargetHeaterCoolerState)
